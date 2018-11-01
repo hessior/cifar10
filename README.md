@@ -1,3 +1,3 @@
 # Model for Cifar10, Keras
 
-Test accuracy is about 80%.
+The test accuracy is about 80%. 
