@@ -43,9 +43,7 @@ def prepare_data(data_path, use_build_in=False):
 
 class Cifar10_model:
     
-    def __init__(self, data_path, ckpt_name="cifar10_ckpt"):
-        self.data_path = data_path
-        self.img, self.label, self.test_img, self.test_label = prepare_data(data_path, use_build_in=False)
+    def __init__(self, ckpt_name="cifar10_ckpt"):
         if not os.path.isdir(ckpt_name):
             os.mkdir(ckpt_name)
         self.ckpt_path = os.path.join(os.getcwd(),ckpt_name)
@@ -67,31 +65,29 @@ class Cifar10_model:
         if weight_name:
             self.model.load_weights(os.path.join(self.ckpt_path,weight_name))
 
-    def train(self):
+    def compile(self):
         opt = keras.optimizers.rmsprop(lr=0.0001,decay=1e-6)
         self.model.compile(optimizer=opt,loss='categorical_crossentropy',metrics=['accuracy'])
-        self.model.fit(self.img, self.label, epochs=100, batch_size=128,
-                        validation_data=(self.test_img,self.test_label))
-        #opt2 = keras.optimizers.rmsprop(lr=0.00001,decay=1e-6)
-        #self.model.compile(optimizer=opt2,loss='categorical_crossentropy',metrics=['accuracy'])
-        #self.model.fit(self.img, self.label, epochs=100, batch_size=128,
-        #                validation_data=(self.test_img,self.test_label))
+
+    def train(self, train_img, train_label, test_img, test_label):
+        self.model.fit(train_img, train_label, epochs=100, batch_size=128,
+                        validation_data=(test_img, test_label))
     
     def save_weight(self, weight_name):
         self.model.save_weights(os.path.join(self.ckpt_path,weight_name))
     
-    def test(self):
-        opt = keras.optimizers.rmsprop(lr=0.0001,decay=1e-6)
-        self.model.compile(optimizer=opt,loss='categorical_crossentropy',metrics=['accuracy'])
-        self.scores = self.model.evaluate(self.test_img,self.test_label)
+    def test(self, test_img, test_label):
+        scores = self.model.evaluate(test_img,test_label)
+        return scores[1]
 
 if __name__ == '__main__':
     data_path = "data/"
     weight_name = "cifar10.h5"
 
-    cifar10_model = Cifar10_model(data_path)      ## create model, load data
-    cifar10_model.build()
-    cifar10_model.train()
-    cifar10_model.save_weight(weight_name)
-    cifar10_model.test()                        ## use either after train() or build() 
-    print(cifar10_model.scores[1])
+    train_img, train_label, test_img, test_label = prepare_data(data_path, use_build_in=False)  
+    cifar10_model = Cifar10_model()      ## create model
+    cifar10_model.build(weight_name)
+    cifar10_model.compile()
+    #cifar10_model.train(train_img, train_label, test_img, test_label)
+    #cifar10_model.save_weight(weight_name)
+    print(cifar10_model.test(test_img, test_label))          ## use either after train() or build() 
