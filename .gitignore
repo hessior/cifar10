@@ -4,7 +4,7 @@ cifar10_ckpt/
 
 old_results/
 old_scripts/
-__pychache__/
+__pycache__/
 
 adv.npy
 generate_advs.py
